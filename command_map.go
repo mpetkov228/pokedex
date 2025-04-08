@@ -1,50 +1,13 @@
 package main
 
 import (
-	"encoding/json"
+	"errors"
 	"fmt"
-	"io"
-	"net/http"
 )
-
-type PokeapiRes struct {
-	Count    int            `json:"count"`
-	Next     string         `json:"next"`
-	Previous string         `json:"previous"`
-	Results  []LocationArea `json:"results"`
-}
-
-type LocationArea struct {
-	Name string
-	Url  string
-}
-
-func GetLocationData(url string) (PokeapiRes, error) {
-	res, err := http.Get(url)
-	if err != nil {
-		return PokeapiRes{}, fmt.Errorf("error making request: %w", err)
-	}
-	defer res.Body.Close()
-
-	data, err := io.ReadAll(res.Body)
-	if err != nil {
-		return PokeapiRes{}, fmt.Errorf("error reading request data: %w", err)
-	}
-
-	var apiResult PokeapiRes
-
-	err = json.Unmarshal(data, &apiResult)
-	if err != nil {
-		return PokeapiRes{}, fmt.Errorf("error unmarshaling json: %w", err)
-	}
-
-	return apiResult, nil
-}
 
 func commandMap(config *Config) error {
 	url := config.Next
-
-	data, err := GetLocationData(url)
+	data, err := config.pokeapiClient.GetLocations(url)
 	if err != nil {
 		return err
 	}
@@ -61,12 +24,11 @@ func commandMap(config *Config) error {
 
 func commandMapb(config *Config) error {
 	url := config.Previous
-	if url == "" {
-		fmt.Println("You are on the first page.")
-		return nil
+	if url == nil {
+		return errors.New("you're on the first page")
 	}
 
-	data, err := GetLocationData(url)
+	data, err := config.pokeapiClient.GetLocations(url)
 	if err != nil {
 		return err
 	}
