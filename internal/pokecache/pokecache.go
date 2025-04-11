@@ -26,14 +26,36 @@ func (c *Cache) Add(key string, val []byte) {
 	c.cache[key] = entry
 }
 
-func (c *Cache) reapLoop(interval time.Duration) {
+func (c *Cache) Get(key string) ([]byte, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	entry, ok := c.cache[key]
+	if !ok {
+		return nil, false
+	}
 
+	return entry.val, true
 }
 
-func NewCache(interval time.Duration) Cache {
-	cache := Cache{
+func (c *Cache) reapLoop(interval time.Duration) {
+	ticker := time.NewTicker(interval)
+	for range ticker.C {
+		c.mu.Lock()
+		func() {
+			defer c.mu.Unlock()
+			for key, entry := range c.cache {
+				age := time.Since(entry.createdAt)
+
+				if age > interval {
+					delete(c.cache, key)
+				}
+			}
+		}()
+	}
+}
+
+func NewCache(interval time.Duration) *Cache {
+	cache := &Cache{
 		cache: make(map[string]cacheEntry),
 	}
 
