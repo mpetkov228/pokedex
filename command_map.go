@@ -9,7 +9,7 @@ import (
 
 func commandMap(config *Config, cache *pokecache.Cache) error {
 	url := config.Next
-	data, err := config.pokeapiClient.GetLocations(url)
+	data, err := config.pokeapiClient.GetLocations(url, cache)
 	if err != nil {
 		return err
 	}
@@ -30,7 +30,7 @@ func commandMapb(config *Config, cache *pokecache.Cache) error {
 		return errors.New("you're on the first page")
 	}
 
-	data, err := config.pokeapiClient.GetLocations(url)
+	data, err := config.pokeapiClient.GetLocations(url, cache)
 	if err != nil {
 		return err
 	}
