@@ -5,10 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/mpetkov228/pokedex/internal/pokeapi"
-	"github.com/mpetkov228/pokedex/internal/pokecache"
 )
 
 type Config struct {
@@ -20,13 +18,12 @@ type Config struct {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*Config, *pokecache.Cache) error
+	callback    func(*Config) error
 }
 
 func startRepl(config *Config) {
 	scanner := bufio.NewScanner(os.Stdin)
 	commands := getCommands()
-	cache := pokecache.NewCache(time.Minute * 10)
 
 	for {
 		fmt.Print("Pokedex > ")
@@ -39,7 +36,7 @@ func startRepl(config *Config) {
 
 		command, ok := commands[input[0]]
 		if ok {
-			err := command.callback(config, cache)
+			err := command.callback(config)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -72,6 +69,11 @@ func getCommands() map[string]cliCommand {
 			name:        "mapb",
 			description: "List previous world locations",
 			callback:    commandMapb,
+		},
+		"explore": {
+			name:        "explore",
+			description: "Explore a world location",
+			callback:    explore,
 		},
 	}
 }

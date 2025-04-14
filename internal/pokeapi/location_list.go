@@ -4,20 +4,16 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-
-	"github.com/mpetkov228/pokedex/internal/pokecache"
 )
 
-func (c *Client) GetLocations(pageUrl *string, cache *pokecache.Cache) (ResLocations, error) {
+func (c *Client) GetLocations(pageUrl *string) (ResLocations, error) {
 	url := baseUrl + "/location-area"
 	if pageUrl != nil {
 		url = *pageUrl
 	}
 
-	var resLocations ResLocations
-
-	entry, ok := cache.Get(url)
-	if ok {
+	if entry, ok := c.cache.Get(url); ok {
+		resLocations := ResLocations{}
 		err := json.Unmarshal(entry, &resLocations)
 		if err != nil {
 			return ResLocations{}, err
@@ -40,12 +36,13 @@ func (c *Client) GetLocations(pageUrl *string, cache *pokecache.Cache) (ResLocat
 	if err != nil {
 		return ResLocations{}, err
 	}
-	cache.Add(url, data)
 
+	resLocations := ResLocations{}
 	err = json.Unmarshal(data, &resLocations)
 	if err != nil {
 		return ResLocations{}, err
 	}
 
+	c.cache.Add(url, data)
 	return resLocations, nil
 }
