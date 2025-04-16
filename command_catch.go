@@ -19,6 +19,7 @@ func catch(config *Config, args ...string) error {
 	if n <= catchChance {
 		config.pokedex[name] = pokemon
 		fmt.Printf("%s was caught!\n", name)
+		fmt.Println("You may now inspect it with the inspect command.")
 	} else {
 		fmt.Printf("%s escaped!\n", name)
 	}
