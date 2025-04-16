@@ -18,7 +18,7 @@ type Config struct {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*Config) error
+	callback    func(*Config, ...string) error
 }
 
 func startRepl(config *Config) {
@@ -36,7 +36,7 @@ func startRepl(config *Config) {
 
 		command, ok := commands[input[0]]
 		if ok {
-			err := command.callback(config)
+			err := command.callback(config, input[1:]...)
 			if err != nil {
 				fmt.Println(err)
 			}
